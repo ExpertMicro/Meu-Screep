@@ -3,9 +3,11 @@
  * module.exports.thing = 'a thing';
  *
  * You can import it from another modules like this:
- * var mod = require('role.harvester');
+ * var mod = require('role.repairer');
  * mod.thing == 'a thing'; // true
  */
+
+var roleBuilder = require('role.builder');
 
 module.exports = {
     run: function (creep) {
@@ -16,24 +18,27 @@ module.exports = {
         }
 
         if (creep.memory.working == true) {
-            var structure = creep.pos.findClosestByPath(FIND_MY_STRUCTURES, {
-                filter: (s) => (s.structureType == STRUCTURE_SPAWN
-                            || s.structureType == STRUCTURE_EXTENSION)
-                            && s.energy < s.energyCapacity
-
+            var structure = creep.pos.findClosestByPath(FIND_STRUCTURES, {
+                filter: (s) => s.hits < s.hitsMax && s.structureType != STRUCTURE_WALL
             });
-            if (structure != undefined) {
-                if (creep.transfer(structure, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+            if (structure != undefined)
+            {
+                if (creep.repair(structure) == ERR_NOT_IN_RANGE)
+                {
                     creep.moveTo(structure);
+                }
+                else
+                {
+                    roleBuilder.run(creep);
                 }
             }
         }
+
         else {
             var source = creep.pos.findClosestByPath(FIND_SOURCES);
             if (creep.harvest(source) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(source);
+                creep.moveTo(source);
             }
-
         }
     }
 
